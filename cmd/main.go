@@ -1,26 +1,45 @@
 package main
 
 import (
+	"database/sql"
+	"fmt"
 	"log"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/tahahamdii/basic-api/cmd/api"
+	"github.com/tahahamdii/basic-api/config"
 	"github.com/tahahamdii/basic-api/db"
 )
 
 func main() {
-	db, err := db.NewMySQLStorage(mysql.Config{
-		User:  "root",
-		Passwd: "root",
-		Addr: "localhost:3306",
-		DBName: "basic_api",
-		Net: "tcp",
-		AllowNativePasswords: true,
-		ParseTime: true,
-	})
+	cfg := mysql.Config{
+	User:                 configs.Envs.DBUser,
+	Passwd:               configs.Envs.DBPassword,
+	Addr:                 configs.Envs.DBAddress,
+	DBName:               configs.Envs.DBName,
+	Net:                  "tcp",
+	AllowNativePasswords: true,
+	ParseTime:            true,
+}
 
-	server := api.NewApiServer(":8080", nil)
-	if err := server.Run(); err != nil {
-		log.Fatalf("Error: %v", err)
+db, err := db.NewMySQLStorage(cfg)
+if err != nil {
+	log.Fatal(err)
+}
+
+initStorage(db)
+
+server := api.NewApiServer(fmt.Sprintf(":%s", configs.Envs.Port), db)
+if err := server.Run(); err != nil {
+	log.Fatal(err)
+}
+}
+
+func initStorage(db *sql.DB) {
+	err := db.Ping()
+	if err != nil {
+		log.Fatal(err)
 	}
+
+	log.Println("DB: Successfully connected!")
 }
