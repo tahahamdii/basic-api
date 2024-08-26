@@ -13,3 +13,10 @@ func ParseJson(r *http.Request, payload any ) error {
 
 	return json.NewDecoder(r.Body).Decode(payload)
 }
+
+func WriteJson(w http.ResponseWriter, status int , v any) error {
+	w.Header().Add("Content-Type","application/json")
+	w.WriteHeader(status)
+
+	return json.NewEncoder(w).Encode(v)
+}
