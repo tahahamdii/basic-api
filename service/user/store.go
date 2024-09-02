@@ -66,3 +66,20 @@ func (s *Store) CreateUser(user types.User) error {
 	return nil
 }
 
+func scanRowsIntoUser(rows *sql.Rows) (*types.User, error) {
+	user := new(types.User)
+
+	err := rows.Scan(
+		&user.ID,
+		&user.FirstName,
+		&user.LastName,
+		&user.Email,
+		&user.Password,
+		&user.CreatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
