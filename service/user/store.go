@@ -15,14 +15,14 @@ func NewStore(db *sql.DB) *Store {
 	return &Store{db: db}
 }
 
-func (s *Store) GetUserByEmail(email string)(*types.User, error) {
+func (s *Store) GetUserByEmail(email string) (*types.User, error) {
 	rows, err := s.db.Query("SELECT * FROM users WHERE emùail = ?", email)
 	if err != nil {
-		return nil , err
+		return nil, err
 	}
 
 	u := new(types.User)
-	for rows.Next(){
+	for rows.Next() {
 		u, err = scanRowIntoRoutes(rows)
 		if err != nil {
 			return nil, err
@@ -36,7 +36,7 @@ func (s *Store) GetUserByEmail(email string)(*types.User, error) {
 	return u, nil
 }
 
-func scanRowIntoRoutes(rows *sql.Rows) (*types.User,error){
+func scanRowIntoRoutes(rows *sql.Rows) (*types.User, error) {
 	user := new(types.User)
 
 	err := rows.Scan(
@@ -54,7 +54,24 @@ func scanRowIntoRoutes(rows *sql.Rows) (*types.User,error){
 }
 
 func (s *Store) GetUserByID(id int) (*types.User, error) {
-	return nil, nil
+	rows, err := s.db.Query("SELECT * FROM users WHERE id = ?", id)
+	if err != nil {
+		return nil, err
+	}
+
+	u := new(types.User)
+	for rows.Next() {
+		u, err = scanRowsIntoUser(rows)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if u.ID == 0 {
+		return nil, fmt.Errorf("user not found")
+	}
+
+	return u, nil
 }
 
 func (s *Store) CreateUser(user types.User) error {
