@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -73,4 +74,7 @@ func CreateJWT(secret []byte, userID int) (string, error) {
 	}
 
 	return tokenString, err
+}
+func permissionDenied(w http.ResponseWriter) {
+	utils.WriteError(w, http.StatusForbidden, fmt.Errorf("permission denied"))
 }
