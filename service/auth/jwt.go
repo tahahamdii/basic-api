@@ -5,11 +5,11 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/tahahamdii/basic-api/types"
 
 	"github.com/golang-jwt/jwt/v5"
-
 )
 
 type contextKey string
@@ -58,4 +58,19 @@ func WithJWTAuth(handlerFunc http.HandlerFunc, store types.UserStore) http.Handl
 		// Call the function if the token is valid
 		handlerFunc(w, r)
 	}
+}
+func CreateJWT(secret []byte, userID int) (string, error) {
+	expiration := time.Second * time.Duration(configs.Envs.JWTExpirationInSeconds)
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"userID":    strconv.Itoa(int(userID)),
+		"expiresAt": time.Now().Add(expiration).Unix(),
+	})
+
+	tokenString, err := token.SignedString(secret)
+	if err != nil {
+		return "", err
+	}
+
+	return tokenString, err
 }
