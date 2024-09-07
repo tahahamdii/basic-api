@@ -9,7 +9,8 @@ import (
 	"time"
 
 	"github.com/tahahamdii/basic-api/types"
-
+	"github.com/tahahamdii/basic-api/config"
+	"github.com/tahahamdii/basic-api/utils"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -60,6 +61,17 @@ func WithJWTAuth(handlerFunc http.HandlerFunc, store types.UserStore) http.Handl
 		handlerFunc(w, r)
 	}
 }
+
+func validateJWT(tokenString string) (*jwt.Token, error) {
+	return jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+
+		return []byte(configs.Envs.JWTSecret), nil
+	})
+}
+
 func CreateJWT(secret []byte, userID int) (string, error) {
 	expiration := time.Second * time.Duration(configs.Envs.JWTExpirationInSeconds)
 
